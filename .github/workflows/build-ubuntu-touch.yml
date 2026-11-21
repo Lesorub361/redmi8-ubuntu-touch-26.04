@@ -1,0 +1,76 @@
+name: Build Ubuntu Touch 26.04 (Xiaomi Redmi 8 / olivelite)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Ubuntu Touch release (26.04-1.x or 24.04-2.x)'
+        required: true
+        default: '26.04-1.x'
+        type: choice
+        options:
+          - '26.04-1.x'
+          - '24.04-2.x'
+
+permissions:
+  contents: write
+
+jobs:
+  build-images:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:20.04
+      options: --privileged
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            android-tools-mkbootimg bc bison build-essential ca-certificates \
+            cpio curl flex git img2simg jq kmod libssl-dev libtinfo5 \
+            python2 python3 sudo unzip wget xz-utils zip e2fsprogs
+          ln -sf /usr/bin/python2.7 /usr/bin/python
+
+      - name: Apply selected release channel
+        if: ${{ github.event.inputs.release != '' }}
+        run: |
+          sed -i 's/deviceinfo_ubuntu_touch_release=.*/deviceinfo_ubuntu_touch_release="${{ github.event.inputs.release }}"/' deviceinfo
+          cat deviceinfo
+
+      - name: Build patched kernel & device tarball
+        run: |
+          mkdir -p bd
+          ./build.sh -b bd
+          ls -lh out/
+
+      - name: Build flashable boot.img and rootfs.img (6 GB)
+        run: |
+          DEVICE="$(source deviceinfo && echo $deviceinfo_codename)"
+          ./build/prepare-fake-ota.sh "out/device_${DEVICE}.tar.xz" ota
+          ./build/system-image-from-ota.sh ota/ubuntu_command images
+          ls -lh images/
+          cd images
+          zip -1 ../ubuntu-images.zip boot.img rootfs.img
+          ls -lh ../ubuntu-images.zip
+
+      - name: Upload boot.img Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: redmi8-boot-img
+          path: images/boot.img
+          retention-days: 30
+
+      - name: Upload Full Flashable Package (ubuntu-images.zip)
+        uses: actions/upload-artifact@v4
+        with:
+          name: redmi8-ubuntu-touch-26.04-images
+          path: ubuntu-images.zip
+          retention-days: 30

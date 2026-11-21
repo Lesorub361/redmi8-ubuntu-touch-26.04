@@ -1,0 +1,12 @@
+[Unit]
+Description=Bridge lcd-backlight brightness to KTD3137 hardware chip on Xiaomi Redmi 8
+After=local-fs.target
+
+[Service]
+ExecStart=/usr/bin/python3 /usr/local/bin/ktd3137-backlight-bridge.py
+Restart=always
+RestartSec=1
+Nice=10
+
+[Install]
+WantedBy=multi-user.target

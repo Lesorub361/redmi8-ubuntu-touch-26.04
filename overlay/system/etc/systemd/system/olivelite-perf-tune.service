@@ -1,0 +1,11 @@
+[Unit]
+Description=ZRAM and VM memory performance tuning for Xiaomi Redmi 8
+After=zram-touch.service local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c "sysctl -w vm.swappiness=60 vm.vfs_cache_pressure=50 vm.page-cluster=0 vm.dirty_ratio=15 vm.dirty_background_ratio=5 || true; iw dev wlan0 set power_save off 2>/dev/null || true"
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

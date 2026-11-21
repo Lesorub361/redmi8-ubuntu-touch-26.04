@@ -1,0 +1,5 @@
+[Unit]
+Description=Execute power/reboot/recovery/fastboot command
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/olivelite-power.sh

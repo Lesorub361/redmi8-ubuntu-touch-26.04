@@ -1,0 +1,6 @@
+[Unit]
+Description=Watch for RAM cache drop trigger
+[Path]
+PathExists=/tmp/olivelite-drop-caches.trigger
+[Install]
+WantedBy=multi-user.target

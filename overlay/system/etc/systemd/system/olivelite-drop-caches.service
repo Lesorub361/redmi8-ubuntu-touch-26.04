@@ -1,0 +1,5 @@
+[Unit]
+Description=Drop Linux page caches cleanly
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c "rm -f /tmp/olivelite-drop-caches.trigger; sync; echo 3 > /proc/sys/vm/drop_caches"

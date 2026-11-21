@@ -1,0 +1,11 @@
+[Unit]
+Description=Enable AW87519 external speaker amplifier on Xiaomi Redmi 8 (olivelite)
+After=lxc-android-config.service sound.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c "sleep 3; [ -w /sys/bus/i2c/devices/2-0058/hwen ] && echo 1 > /sys/bus/i2c/devices/2-0058/hwen; [ -w /sys/bus/i2c/devices/2-0058/mode ] && echo 1 > /sys/bus/i2c/devices/2-0058/mode; amixer -c 0 cset name='Ext Spk Boost' ENABLE || true; amixer -c 0 cset name='SPK' Switch || true"
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,29 @@
+image: ubuntu:20.04
+
+build:
+  stage: build
+  script:
+    - apt update
+    - apt install android-tools-mkbootimg bc bison build-essential ca-certificates cpio curl flex git kmod libssl-dev libtinfo5 python2 sudo unzip wget xz-utils -y --no-install-recommends
+    - ln -sf python2.7 /usr/bin/python
+    - mkdir bd
+    - ./build.sh -b bd
+  artifacts:
+    paths:
+      - out/*
+
+devel-flashable:
+  stage: deploy
+  script:
+    - apt update
+    - apt install -y img2simg jq sudo wget xz-utils zip
+    - DEVICE="$(source deviceinfo && echo $deviceinfo_codename)"
+    - ./build/prepare-fake-ota.sh out/device_$DEVICE.tar.xz ota
+    - ./build/system-image-from-ota.sh ota/ubuntu_command images
+    - cd images
+    - zip ../ubuntu-images.zip boot.img rootfs.img
+  artifacts:
+    paths:
+      - ubuntu-images.zip
+      - images/boot.img
+

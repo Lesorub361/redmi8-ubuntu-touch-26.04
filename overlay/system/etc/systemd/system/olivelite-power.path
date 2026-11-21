@@ -1,0 +1,6 @@
+[Unit]
+Description=Watch for power/reboot/recovery/fastboot trigger
+[Path]
+PathExists=/tmp/olivelite-power.cmd
+[Install]
+WantedBy=multi-user.target
