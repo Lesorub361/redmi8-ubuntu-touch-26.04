@@ -46,12 +46,14 @@ jobs:
           cat deviceinfo
 
       - name: Build patched kernel & device tarball
+        shell: bash
         run: |
           mkdir -p bd
           ./build.sh -b bd
           ls -lh out/
 
       - name: Build flashable boot.img and rootfs.img (6 GB)
+        shell: bash
         run: |
           DEVICE="$(source deviceinfo && echo $deviceinfo_codename)"
           ./build/prepare-fake-ota.sh "out/device_${DEVICE}.tar.xz" ota
